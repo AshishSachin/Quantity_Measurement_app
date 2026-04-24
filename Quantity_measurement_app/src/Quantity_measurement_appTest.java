@@ -3,50 +3,99 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Quantity_measurement_appTest {
 
+    // ===== ENUM TESTS =====
     @Test
-    void testAddition_TargetFeet() {
-        var q1 = new Quantity_measurement_app.Quantity(1.0, Quantity_measurement_app.LengthUnit.FEET);
-        var q2 = new Quantity_measurement_app.Quantity(12.0, Quantity_measurement_app.LengthUnit.INCH);
-
-        assertEquals(2.0, q1.add(q2, Quantity_measurement_app.LengthUnit.FEET)
-                .convertTo(Quantity_measurement_app.LengthUnit.FEET), 1e-6);
+    void testConvertToBaseUnit_InchesToFeet() {
+        assertEquals(1.0,
+                LengthUnit.INCH.convertToBaseUnit(12.0),
+                1e-6);
     }
 
     @Test
-    void testAddition_TargetInches() {
-        var q1 = new Quantity_measurement_app.Quantity(1.0, Quantity_measurement_app.LengthUnit.FEET);
-        var q2 = new Quantity_measurement_app.Quantity(12.0, Quantity_measurement_app.LengthUnit.INCH);
-
-        assertEquals(24.0, q1.add(q2, Quantity_measurement_app.LengthUnit.INCH)
-                .convertTo(Quantity_measurement_app.LengthUnit.INCH), 1e-6);
+    void testConvertFromBaseUnit_FeetToInches() {
+        assertEquals(12.0,
+                LengthUnit.INCH.convertFromBaseUnit(1.0),
+                1e-6);
     }
 
     @Test
-    void testAddition_TargetYards() {
-        var q1 = new Quantity_measurement_app.Quantity(1.0, Quantity_measurement_app.LengthUnit.FEET);
-        var q2 = new Quantity_measurement_app.Quantity(12.0, Quantity_measurement_app.LengthUnit.INCH);
-
-        assertEquals(0.6667, q1.add(q2, Quantity_measurement_app.LengthUnit.YARD)
-                .convertTo(Quantity_measurement_app.LengthUnit.YARD), 1e-3);
+    void testConvertToBaseUnit_YardToFeet() {
+        assertEquals(3.0,
+                LengthUnit.YARD.convertToBaseUnit(1.0),
+                1e-6);
     }
 
     @Test
-    void testAddition_Commutativity() {
-        var q1 = new Quantity_measurement_app.Quantity(1.0, Quantity_measurement_app.LengthUnit.FEET);
-        var q2 = new Quantity_measurement_app.Quantity(12.0, Quantity_measurement_app.LengthUnit.INCH);
+    void testConvertFromBaseUnit_FeetToCm() {
+        assertEquals(30.48,
+                LengthUnit.CM.convertFromBaseUnit(1.0),
+                1e-2);
+    }
 
-        var result1 = q1.add(q2, Quantity_measurement_app.LengthUnit.FEET);
-        var result2 = q2.add(q1, Quantity_measurement_app.LengthUnit.FEET);
+    // ===== QUANTITY TESTS =====
+    @Test
+    void testEquality_FeetAndInches() {
+        var q1 = new Quantity_measurement_app.Quantity(1.0, LengthUnit.FEET);
+        var q2 = new Quantity_measurement_app.Quantity(12.0, LengthUnit.INCH);
 
-        assertEquals(result1.convertTo(Quantity_measurement_app.LengthUnit.FEET),
-                result2.convertTo(Quantity_measurement_app.LengthUnit.FEET), 1e-6);
+        assertTrue(q1.equals(q2));
     }
 
     @Test
-    void testAddition_NullTarget() {
-        var q1 = new Quantity_measurement_app.Quantity(1.0, Quantity_measurement_app.LengthUnit.FEET);
-        var q2 = new Quantity_measurement_app.Quantity(12.0, Quantity_measurement_app.LengthUnit.INCH);
+    void testConvertTo() {
+        var q = new Quantity_measurement_app.Quantity(1.0, LengthUnit.FEET);
 
-        assertThrows(IllegalArgumentException.class, () -> q1.add(q2, null));
+        var result = q.convertTo(LengthUnit.INCH);
+
+        assertEquals(12.0,
+                result.convertTo(LengthUnit.INCH),
+                1e-6);
+    }
+
+    // ===== ADDITION (UC6) =====
+    @Test
+    void testAddition_DefaultUnit() {
+        var q1 = new Quantity_measurement_app.Quantity(1.0, LengthUnit.FEET);
+        var q2 = new Quantity_measurement_app.Quantity(12.0, LengthUnit.INCH);
+
+        var result = q1.add(q2);
+
+        assertEquals(2.0,
+                result.convertTo(LengthUnit.FEET),
+                1e-6);
+    }
+
+    // ===== ADDITION WITH TARGET (UC7) =====
+    @Test
+    void testAddition_TargetUnit_Yard() {
+        var q1 = new Quantity_measurement_app.Quantity(1.0, LengthUnit.FEET);
+        var q2 = new Quantity_measurement_app.Quantity(12.0, LengthUnit.INCH);
+
+        var result = q1.add(q2, LengthUnit.YARD);
+
+        assertEquals(0.6667,
+                result.convertTo(LengthUnit.YARD),
+                1e-3);
+    }
+
+    // ===== EDGE CASES =====
+    @Test
+    void testNullUnit_Throws() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new Quantity_measurement_app.Quantity(1.0, null));
+    }
+
+    @Test
+    void testInvalidValue_Throws() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new Quantity_measurement_app.Quantity(Double.NaN, LengthUnit.FEET));
+    }
+
+    @Test
+    void testNullAddition_Throws() {
+        var q = new Quantity_measurement_app.Quantity(1.0, LengthUnit.FEET);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                q.add(null));
     }
 }

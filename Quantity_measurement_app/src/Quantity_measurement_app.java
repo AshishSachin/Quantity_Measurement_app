@@ -1,22 +1,24 @@
 public class Quantity_measurement_app {
 
-    // Step 1: Enum for units
+    // Enum with all units
     enum LengthUnit {
         FEET(1.0),
-        INCH(1.0 / 12.0);
+        INCH(1.0 / 12.0),
+        YARD(3.0),
+        CM(0.0328084); // converted to feet
 
-        private final double conversionFactorToFeet;
+        private final double toFeetFactor;
 
         LengthUnit(double factor) {
-            this.conversionFactorToFeet = factor;
+            this.toFeetFactor = factor;
         }
 
         public double toFeet(double value) {
-            return value * conversionFactorToFeet;
+            return value * toFeetFactor;
         }
     }
 
-    // Step 2: Generic Quantity Class
+    // Generic Quantity class
     static class Quantity {
         private final double value;
         private final LengthUnit unit;
@@ -46,12 +48,16 @@ public class Quantity_measurement_app {
         }
     }
 
-    // Main method
     public static void main(String[] args) {
 
-        Quantity q1 = new Quantity(1.0, LengthUnit.FEET);
-        Quantity q2 = new Quantity(12.0, LengthUnit.INCH);
+        Quantity q1 = new Quantity(1.0, LengthUnit.YARD);
+        Quantity q2 = new Quantity(3.0, LengthUnit.FEET);
 
         System.out.println("Equal: " + q1.equals(q2));
+
+        Quantity q3 = new Quantity(1.0, LengthUnit.CM);
+        Quantity q4 = new Quantity(0.393701, LengthUnit.INCH);
+
+        System.out.println("Equal: " + q3.equals(q4));
     }
 }

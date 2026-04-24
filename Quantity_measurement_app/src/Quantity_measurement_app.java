@@ -36,9 +36,9 @@ public class Quantity_measurement_app {
         }
 
         // ===== UC6: ADD METHOD =====
-        public Quantity add(Quantity other) {
-            if (other == null) {
-                throw new IllegalArgumentException("Other quantity cannot be null");
+        public Quantity add(Quantity other, LengthUnit targetUnit) {
+            if (other == null || targetUnit == null) {
+                throw new IllegalArgumentException("Invalid input");
             }
 
             // Convert both to base unit (feet)
@@ -48,11 +48,12 @@ public class Quantity_measurement_app {
             // Add
             double sumFeet = thisFeet + otherFeet;
 
-            // Convert result back to this unit
-            double resultValue = this.unit.fromFeet(sumFeet);
+            // Convert to target unit
+            double resultValue = targetUnit.fromFeet(sumFeet);
 
-            return new Quantity(resultValue, this.unit);
+            return new Quantity(resultValue, targetUnit);
         }
+
 
         @Override
         public String toString() {

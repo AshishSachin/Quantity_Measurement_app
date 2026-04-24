@@ -1,11 +1,11 @@
 public class Quantity_measurement_app {
 
-    // Enum with all units
+    // Enum with conversion factors to FEET (base unit)
     enum LengthUnit {
         FEET(1.0),
         INCH(1.0 / 12.0),
         YARD(3.0),
-        CM(0.0328084); // converted to feet
+        CM(0.0328084);
 
         private final double toFeetFactor;
 
@@ -16,6 +16,10 @@ public class Quantity_measurement_app {
         public double toFeet(double value) {
             return value * toFeetFactor;
         }
+
+        public double fromFeet(double feetValue) {
+            return feetValue / toFeetFactor;
+        }
     }
 
     // Generic Quantity class
@@ -24,15 +28,20 @@ public class Quantity_measurement_app {
         private final LengthUnit unit;
 
         public Quantity(double value, LengthUnit unit) {
-            if (unit == null) {
-                throw new IllegalArgumentException("Unit cannot be null");
+            if (unit == null || !Double.isFinite(value)) {
+                throw new IllegalArgumentException("Invalid input");
             }
             this.value = value;
             this.unit = unit;
         }
 
-        private double toFeet() {
-            return unit.toFeet(value);
+        public double convertTo(LengthUnit targetUnit) {
+            if (targetUnit == null) {
+                throw new IllegalArgumentException("Target unit cannot be null");
+            }
+
+            double valueInFeet = unit.toFeet(value);
+            return targetUnit.fromFeet(valueInFeet);
         }
 
         @Override
@@ -44,20 +53,34 @@ public class Quantity_measurement_app {
 
             Quantity other = (Quantity) obj;
 
-            return Double.compare(this.toFeet(), other.toFeet()) == 0;
+            double thisFeet = unit.toFeet(value);
+            double otherFeet = other.unit.toFeet(other.value);
+
+            return Double.compare(thisFeet, otherFeet) == 0;
+        }
+
+        @Override
+        public String toString() {
+            return value + " " + unit;
         }
     }
 
+    // Static API method (as mentioned in your doc)
+    public static double convert(double value, LengthUnit source, LengthUnit target) {
+        if (!Double.isFinite(value) || source == null || target == null) {
+            throw new IllegalArgumentException("Invalid input");
+        }
+
+        double valueInFeet = source.toFeet(value);
+        return target.fromFeet(valueInFeet);
+    }
+
+    // Demo
     public static void main(String[] args) {
 
-        Quantity q1 = new Quantity(1.0, LengthUnit.YARD);
-        Quantity q2 = new Quantity(3.0, LengthUnit.FEET);
-
-        System.out.println("Equal: " + q1.equals(q2));
-
-        Quantity q3 = new Quantity(1.0, LengthUnit.CM);
-        Quantity q4 = new Quantity(0.393701, LengthUnit.INCH);
-
-        System.out.println("Equal: " + q3.equals(q4));
+        System.out.println(convert(1.0, LengthUnit.FEET, LengthUnit.INCH));   // 12
+        System.out.println(convert(3.0, LengthUnit.YARD, LengthUnit.FEET));   // 9
+        System.out.println(convert(36.0, LengthUnit.INCH, LengthUnit.YARD));  // 1
+        System.out.println(convert(1.0, LengthUnit.CM, LengthUnit.INCH));     // ~0.3937
     }
 }
